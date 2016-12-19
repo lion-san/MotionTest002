@@ -25,7 +25,7 @@
 #include <Kalman.h>               //KalmanFilter : https://github.com/TKJElectronics/KalmanFilter
 
 ///////////////////////カルマンフィルタ/////////////////////////////
-Madgwick filter;
+//Madgwick filter;
 Kalman kalmanX; // instances
 Kalman kalmanY; // instances
 unsigned long time;
@@ -123,7 +123,7 @@ void setup(void) {
   }
   //=======================================================
 delay(100); // Wait for sensor to stabilize
-filter.begin(100);
+//filter.begin(500);
 
 //初期値計算
 initCalmanFilter();
@@ -247,9 +247,9 @@ String printAttitude(boolean print)
 
   String output = "";
 
-  accX = imu.ax; 
-  accY = imu.ay; 
-  accZ = imu.az; 
+  accX = imu.calcAccel(imu.ax); 
+  accY = imu.calcAccel(imu.ay); 
+  accZ = imu.calcAccel(imu.az); 
 
   
   gyroX = imu.gx; 
@@ -274,9 +274,13 @@ String printAttitude(boolean print)
 #endif
 
 
-  double gyroXrate = gyroX / 131.0; // Convert to deg/s 
-  double gyroYrate = gyroY / 131.0; // Convert to deg/s 
-  double gyroZrate = gyroZ / 131.0; // Convert to deg/s 
+  //double gyroXrate = gyroX / 131.0; // Convert to deg/s 
+  //double gyroYrate = gyroY / 131.0; // Convert to deg/s 
+  //double gyroZrate = gyroZ / 131.0; // Convert to deg/s 
+
+  double gyroXrate = imu.calcGyro(gyroX); // Convert to deg/s 
+  double gyroYrate = imu.calcGyro(gyroY); // Convert to deg/s 
+  double gyroZrate = imu.calcGyro(gyroZ); // Convert to deg/s 
 
 
 
@@ -322,9 +326,10 @@ heading = atan2(magX, magY) * RAD_TO_DEG + 180;
     Serial.print(kalAngleY);
     Serial.print(" ");
     Serial.print(kalAngleX);
+    Serial.println(" ");
 
-
-    filter.updateIMU(gyroX* RAD_TO_DEG, gyroY* RAD_TO_DEG, gyroZ* RAD_TO_DEG, accX* RAD_TO_DEG, accY* RAD_TO_DEG, accZ* RAD_TO_DEG);
+/*    filter.updateIMU(gyroXrate * RAD_TO_DEG, gyroYrate * RAD_TO_DEG, gyroZrate * RAD_TO_DEG,
+      imu.calcAccel(accX), imu.calcAccel(accY), imu.calcAccel(accZ));
 
 
     // print the heading, pitch and roll
@@ -338,7 +343,7 @@ heading = atan2(magX, magY) * RAD_TO_DEG + 180;
     Serial.print(pitch2);
     Serial.print(" ");
     Serial.println(roll2);
-
+*/
 
   return output;
 }
@@ -358,9 +363,12 @@ void initCalmanFilter(){
 //  double pitch = filter.getPitch();
 //  double heading = filter.getYaw();
 
-  accX = imu.ax; 
-  accY = imu.ay; 
-  accZ = imu.az; 
+  //accX = imu.ax; 
+  //accY = imu.ay; 
+  //accZ = imu.az; 
+  accX = imu.calcAccel(imu.ax); 
+  accY = imu.calcAccel(imu.ay); 
+  accZ = imu.calcAccel(imu.az);
 
 #ifdef RESTRICT_PITCH // Eq. 25 and 26 
   roll  = atan2(accY, accZ) * RAD_TO_DEG; 
