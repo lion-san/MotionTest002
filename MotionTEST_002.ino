@@ -21,11 +21,11 @@
 #include <LSM9DS1_Registers.h>
 #include <LSM9DS1_Types.h>
 #include <SoftwareSerial.h>                  
-//#include <MadgwickAHRS.h>               //MadgwickAHRS : https://github.com/arduino-libraries/MadgwickAHRS
+#include <MadgwickAHRS.h>               //MadgwickAHRS : https://github.com/arduino-libraries/MadgwickAHRS
 #include <Kalman.h>               //KalmanFilter : https://github.com/TKJElectronics/KalmanFilter
 
 ///////////////////////カルマンフィルタ/////////////////////////////
-//Madgwick filter;
+Madgwick filter;
 Kalman kalmanX; // instances
 Kalman kalmanY; // instances
 unsigned long time;
@@ -123,7 +123,7 @@ void setup(void) {
   }
   //=======================================================
 delay(100); // Wait for sensor to stabilize
-//filter.begin(5);
+filter.begin(100);
 
 //初期値計算
 initCalmanFilter();
@@ -321,24 +321,24 @@ heading = atan2(magX, magY) * RAD_TO_DEG + 180;
     Serial.print(" ");
     Serial.print(kalAngleY);
     Serial.print(" ");
-    Serial.println(kalAngleX);
+    Serial.print(kalAngleX);
 
 
-/*    filter.updateIMU(imu.calcGyro(gx), imu.calcGyro(gy), imu.calcGyro(gz), ax, ay, az);
+    filter.updateIMU(gyroX* RAD_TO_DEG, gyroY* RAD_TO_DEG, gyroZ* RAD_TO_DEG, accX* RAD_TO_DEG, accY* RAD_TO_DEG, accZ* RAD_TO_DEG);
 
 
     // print the heading, pitch and roll
     double roll2 = filter.getRoll();
     double pitch2 = filter.getPitch();
     double heading2 = filter.getYaw();
-    heading2 = 0;
+    Serial.print("\t");
     Serial.print("MadgwickAHRS: ");
     Serial.print(heading2);
     Serial.print(" ");
     Serial.print(pitch2);
     Serial.print(" ");
     Serial.println(roll2);
-*/
+
 
   return output;
 }
