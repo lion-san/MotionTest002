@@ -259,7 +259,9 @@ String printAttitude(boolean print)
   magX = imu.mx; 
   magY = imu.my; 
   magZ = imu.mz; 
-
+ // magX = imu.calcMag(imu.mx); 
+ /// magY = imu.calcMag(imu.my); 
+  //magZ = imu.calcMag(imu.mz); 
 
   //時間の更新
   double dt = (double)(millis() - time) / 1000; // Calculate delta time  
@@ -307,7 +309,16 @@ String printAttitude(boolean print)
 
 
 float heading = 0;
-heading = atan2(magX, magY) * RAD_TO_DEG + 180;
+//heading = atan2(magX, magY) * RAD_TO_DEG + 180;
+
+    heading = atan2(magX, magY);
+
+     if (heading < 0) heading += 2*PI ;
+     if (heading > 2*PI) heading -= 2*PI;
+     heading = heading * 180/M_PI ;
+     // 西偏(日本)の場合で磁気偏角を調整する
+     heading = heading + 6.6 ;// 磁気偏角6.6度
+     if (heading > 360.0) heading = heading - 360.0 ;
 
 
 
