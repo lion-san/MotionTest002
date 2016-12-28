@@ -28,8 +28,9 @@
 //Madgwick filter;
 Kalman kalmanX; // instances
 Kalman kalmanY; // instances
+Kalman kalmanZ;
 unsigned long time;
-double kalAngleX, kalAngleY; // Calculated angle using a Kalman filter
+double kalAngleX, kalAngleY, kalAngleZ; // Calculated angle using a Kalman filter
 double accX, accY, accZ; 
 double gyroX, gyroY, gyroZ; 
 double magX, magY, magZ; 
@@ -280,9 +281,9 @@ String printAttitude(boolean print)
   //double gyroYrate = gyroY / 131.0; // Convert to deg/s 
   //double gyroZrate = gyroZ / 131.0; // Convert to deg/s 
 
-  double gyroXrate = imu.calcGyro(gyroX); // Convert to deg/s 
-  double gyroYrate = imu.calcGyro(gyroY); // Convert to deg/s 
-  double gyroZrate = imu.calcGyro(gyroZ); // Convert to deg/s 
+  double gyroXrate = gyroX; // Convert to deg/s 
+  double gyroYrate = gyroY; // Convert to deg/s 
+  double gyroZrate = gyroZ; // Convert to deg/s 
 
 
 
@@ -320,6 +321,11 @@ float heading = 0;
      heading = heading + 6.6 ;// 磁気偏角6.6度
      if (heading > 360.0) heading = heading - 360.0 ;
 
+  if ( abs(heading - kalAngleZ) > 359 ) { 
+    kalmanZ.setAngle(heading); 
+    kalAngleZ = heading; 
+  } else
+    kalAngleZ = kalmanZ.getAngle(heading, gyroZrate, dt); 
 
 
 /*
@@ -394,6 +400,22 @@ void initCalmanFilter(){
   kalmanX.setAngle(roll); // Set starting angle
   kalmanY.setAngle(pitch); // Set starting angle
 
+
+/*
+  float heading = 0;
+  //heading = atan2(magX, magY) * RAD_TO_DEG + 180;
+
+  heading = atan2(magX, magY);
+
+   if (heading < 0) heading += 2*PI ;
+   if (heading > 2*PI) heading -= 2*PI;
+   heading = heading * 180/M_PI ;
+   // 西偏(日本)の場合で磁気偏角を調整する
+   heading = heading + 6.6 ;// 磁気偏角6.6度
+   if (heading > 360.0) heading = heading - 360.0 ;
+
+  kalmanZ.setAngle(heading); // Set starting angle
+*/
 
   //時間の更新
   time = millis();
