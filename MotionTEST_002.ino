@@ -51,7 +51,7 @@ float roll, pitch;
 #define TX 9                            //GPS用のソフトウェアシリアル
 #define SENTENCES_BUFLEN      82        // GPSのメッセージデータバッファの個数
 
-#define RESTRICT_PITCH // Comment out to restrict roll to ±90deg instead - please read: http://www.freescale.com/files/sensors/doc/app_note/AN3461.pdf 
+//#define RESTRICT_PITCH // Comment out to restrict roll to ±90deg instead - please read: http://www.freescale.com/files/sensors/doc/app_note/AN3461.pdf 
 
 //-------------------------------------------------------------------------
 //[Global valiables]
@@ -309,7 +309,16 @@ String printAttitude(boolean print)
 
 
 float heading = 0;
-heading = atan2(magX, magY) * RAD_TO_DEG + 180;
+//heading = atan2(magX, magY) * RAD_TO_DEG + 180;
+
+    heading = atan2(magX, magY);
+
+     if (heading < 0) heading += 2*PI ;
+     if (heading > 2*PI) heading -= 2*PI;
+     heading = heading * 180/M_PI ;
+     // 西偏(日本)の場合で磁気偏角を調整する
+     heading = heading + 6.6 ;// 磁気偏角6.6度
+     if (heading > 360.0) heading = heading - 360.0 ;
 
 
 
