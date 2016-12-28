@@ -247,18 +247,20 @@ String printAttitude(boolean print)
 
   String output = "";
 
+  // [ g]
   accX = imu.calcAccel(imu.ax); 
   accY = imu.calcAccel(imu.ay); 
   accZ = imu.calcAccel(imu.az); 
 
-  
-  gyroX = imu.gx; 
-  gyroY = imu.gy; 
-  gyroZ = imu.gz; 
+  // [deg/s]
+  gyroX = imu.calcGyro(imu.gx);
+  gyroY = imu.calcGyro(imu.gy); 
+  gyroZ = imu.calcGyro(imu.gz); 
 
-  magX = imu.mx; 
-  magY = imu.my; 
-  magZ = imu.mz; 
+  // [ gauss]
+  magX = imu.calcMag(imu.mx); 
+  magY = imu.calcMag(imu.my); 
+  magZ = imu.calcMag(imu.mz); 
 
 
   //時間の更新
