@@ -51,7 +51,7 @@ float roll, pitch;
 #define TX 9                            //GPS用のソフトウェアシリアル
 #define SENTENCES_BUFLEN      82        // GPSのメッセージデータバッファの個数
 
-//#define RESTRICT_PITCH // Comment out to restrict roll to ±90deg instead - please read: http://www.freescale.com/files/sensors/doc/app_note/AN3461.pdf 
+#define RESTRICT_PITCH // Comment out to restrict roll to ±90deg instead - please read: http://www.freescale.com/files/sensors/doc/app_note/AN3461.pdf 
 
 //-------------------------------------------------------------------------
 //[Global valiables]
@@ -268,11 +268,12 @@ String printAttitude(boolean print)
   time = millis();
 
 #ifdef RESTRICT_PITCH // Eq. 25 and 26 
-  roll  = atan2(accY, accZ) * RAD_TO_DEG;//+++++++++++++++++++++++ 
-  pitch = atan(-accX / sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG; 
+  pitch  = atan2(accY, accZ) * RAD_TO_DEG;
+  //roll = atan(-accX / sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG;
+  roll  = atan2(accX, accZ) * RAD_TO_DEG;
 #else // Eq. 28 and 29 
-  roll  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
-  pitch = atan2(-accX, accZ) * RAD_TO_DEG; 
+  pitch  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
+  roll = atan2(-accX, accZ) * RAD_TO_DEG; 
 #endif
 
 
@@ -288,22 +289,25 @@ String printAttitude(boolean print)
 
 #ifdef RESTRICT_PITCH 
   // This fixes the transition problem when the accelerometer angle jumps between -180 and 180 degrees 
-  if ((roll < -90 && kalAngleX > 90) || (roll > 90 && kalAngleX < -90)) { 
-    kalmanX.setAngle(roll); 
-    kalAngleX = roll; 
+  if ((pitch < -90 && kalAngleX > 90) || (pitch > 90 && kalAngleX < -90)) { 
+    kalmanX.setAngle(pitch); 
+    kalAngleX = pitch; 
   } else
-    kalAngleX = kalmanX.getAngle(roll, gyroXrate, dt); // Calculate the angle using a Kalman filter 
+    kalAngleX = kalmanX.getAngle(pitch, gyroXrate, dt); // Calculate the angle using a Kalman filter 
   
-  kalAngleY = kalmanY.getAngle(pitch, gyroYrate, dt); 
+  kalAngleY = kalmanY.getAngle(roll, gyroYrate, dt); 
+
 #else
   // This fixes the transition problem when the accelerometer angle jumps between -180 and 180 degrees 
-  if ((pitch < -90 && kalAngleY > 90) || (pitch > 90 && kalAngleY < -90)) { 
-    kalmanY.setAngle(pitch); 
-    kalAngleY = pitch; 
+  if ((roll < -90 && kalAngleY > 90) || (roll > 90 && kalAngleY < -90)) { 
+    kalmanY.setAngle(roll); 
+    kalAngleY = roll; 
   } else
-    kalAngleY = kalmanY.getAngle(pitch, gyroYrate, dt); // Calculate the angle using a Kalman filter 
+    kalAngleY = kalmanY.getAngle(roll, gyroYrate, dt); // Calculate the angle using a Kalman filter 
   
-  kalAngleX = kalmanX.getAngle(roll, gyroXrate, dt); // Calculate the angle using a Kalman filter 
+  kalAngleX = kalmanX.getAngle(pitch, gyroXrate, dt); // Calculate the angle using a Kalman filter 
+
+    Serial.println("********************************");
 #endif
 
 
@@ -334,27 +338,10 @@ float heading = 0;
     Serial.print("CalmanFilter: ");
     Serial.print(heading);
     Serial.print(" ");
-    Serial.print(kalAngleY);
+    Serial.print(kalAngleX);//pitch
     Serial.print(" ");
-    Serial.print(kalAngleX);
+    Serial.print(kalAngleY);//roll
     Serial.println(" ");
-
-/*    filter.updateIMU(gyroXrate * RAD_TO_DEG, gyroYrate * RAD_TO_DEG, gyroZrate * RAD_TO_DEG,
-      imu.calcAccel(accX), imu.calcAccel(accY), imu.calcAccel(accZ));
-
-
-    // print the heading, pitch and roll
-    double roll2 = filter.getRoll();
-    double pitch2 = filter.getPitch();
-    double heading2 = filter.getYaw();
-    Serial.print("\t");
-    Serial.print("MadgwickAHRS: ");
-    Serial.print(heading2);
-    Serial.print(" ");
-    Serial.print(pitch2);
-    Serial.print(" ");
-    Serial.println(roll2);
-*/
 
   return output;
 }
@@ -382,17 +369,18 @@ void initCalmanFilter(){
   accZ = imu.calcAccel(imu.az);
 
 #ifdef RESTRICT_PITCH // Eq. 25 and 26 
-  roll  = atan2(accY, accZ) * RAD_TO_DEG; 
-  pitch = atan(-accX / sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG; 
+  pitch  = atan2(accY, accZ) * RAD_TO_DEG; 
+  //roll = atan(-accX / sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG;
+  roll  = atan2(accX, accZ) * RAD_TO_DEG;
 #else // Eq. 28 and 29 
-  roll  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
-  pitch = atan2(-accX, accZ) * RAD_TO_DEG; 
+  pitch  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
+  roll = atan2(-accX, accZ) * RAD_TO_DEG; 
 #endif
 
 
 
-  kalmanX.setAngle(roll); // Set starting angle
-  kalmanY.setAngle(pitch); // Set starting angle
+  kalmanX.setAngle(pitch); // Set starting angle
+  kalmanY.setAngle(roll); // Set starting angle
 
 
   //時間の更新
