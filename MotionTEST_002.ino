@@ -272,9 +272,10 @@ String printAttitude(boolean print)
   //roll  = atan2(accY, accZ) * RAD_TO_DEG;//+++++++++++++++++++++++ 
   roll = atan( accX / sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG; 
   pitch = atan( accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
+
 #else // Eq. 28 and 29 
-  roll  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
-  pitch = atan2(-accX, accZ) * RAD_TO_DEG; 
+  pitch  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
+  roll = atan2(-accX, accZ) * RAD_TO_DEG; 
 #endif
 
 
@@ -297,15 +298,18 @@ String printAttitude(boolean print)
     kalAngleX = kalmanX.getAngle(roll, gyroXrate, dt); // Calculate the angle using a Kalman filter 
   
   kalAngleY = kalmanY.getAngle(pitch, gyroYrate, dt); 
+
 #else
   // This fixes the transition problem when the accelerometer angle jumps between -180 and 180 degrees 
-  if ((pitch < -90 && kalAngleY > 90) || (pitch > 90 && kalAngleY < -90)) { 
-    kalmanY.setAngle(pitch); 
-    kalAngleY = pitch; 
+  if ((roll < -90 && kalAngleY > 90) || (roll > 90 && kalAngleY < -90)) { 
+    kalmanY.setAngle(roll); 
+    kalAngleY = roll; 
   } else
-    kalAngleY = kalmanY.getAngle(pitch, gyroYrate, dt); // Calculate the angle using a Kalman filter 
+    kalAngleY = kalmanY.getAngle(roll, gyroYrate, dt); // Calculate the angle using a Kalman filter 
   
-  kalAngleX = kalmanX.getAngle(roll, gyroXrate, dt); // Calculate the angle using a Kalman filter 
+  kalAngleX = kalmanX.getAngle(pitch, gyroXrate, dt); // Calculate the angle using a Kalman filter 
+
+    Serial.println("********************************");
 #endif
 
 
@@ -341,27 +345,12 @@ float heading = 0;
     Serial.print("CalmanFilter: ");
     Serial.print(heading);
     Serial.print(" ");
+
     Serial.print(kalAngleY);//pitch
     Serial.print(" ");
     Serial.print(kalAngleX);//roll
+
     Serial.println(" ");
-
-/*    filter.updateIMU(gyroXrate * RAD_TO_DEG, gyroYrate * RAD_TO_DEG, gyroZrate * RAD_TO_DEG,
-      imu.calcAccel(accX), imu.calcAccel(accY), imu.calcAccel(accZ));
-
-
-    // print the heading, pitch and roll
-    double roll2 = filter.getRoll();
-    double pitch2 = filter.getPitch();
-    double heading2 = filter.getYaw();
-    Serial.print("\t");
-    Serial.print("MadgwickAHRS: ");
-    Serial.print(heading2);
-    Serial.print(" ");
-    Serial.print(pitch2);
-    Serial.print(" ");
-    Serial.println(roll2);
-*/
 
   return output;
 }
@@ -392,9 +381,10 @@ void initCalmanFilter(){
   //roll  = atan2(accY, accZ) * RAD_TO_DEG; 
   roll = atan( accX / sqrt(accY * accY + accZ * accZ)) * RAD_TO_DEG; 
   pitch = atan( accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
+
 #else // Eq. 28 and 29 
-  roll  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
-  pitch = atan2(-accX, accZ) * RAD_TO_DEG; 
+  pitch  = atan(accY / sqrt(accX * accX + accZ * accZ)) * RAD_TO_DEG; 
+  roll = atan2(-accX, accZ) * RAD_TO_DEG; 
 #endif
 
 
